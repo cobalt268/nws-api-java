@@ -2,19 +2,13 @@ package weather;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Scanner;
 import java.math.BigDecimal;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
-import com.github.cliftonlabs.json_simple.Jsoner;
 import com.github.cliftonlabs.json_simple.JsonArray;
 
 
-public class Point {
-	/**
-	 * The API response wrapped by this class.
-	 */
-	private JsonObject pointJson = null;
+public class Point extends NWSJson {
 	/**
 	 * Holds potential errors returned by invalid API calls.
 	 */
@@ -34,19 +28,7 @@ public class Point {
 	 */
 	public Point(double latitude, double longitude) throws IOException {
 		URL url = new URL(String.format("https://api.weather.gov/points/%.2f%%2C%.2f", latitude, longitude));
-		// catch invalid position or
-		try {
-			Scanner urlScan = new Scanner(url.openStream());
-			String jsonString = "";
-			while (urlScan.hasNext()) {
-				jsonString += urlScan.next();
-			}
-
-			this.pointJson = Jsoner.deserialize(jsonString, pointJson);
-		} catch (IOException e) {
-			error = e;
-			this.valid = false;
-		}
+		setJson(requestJson(url));
 	}
 
 	/**
@@ -55,7 +37,7 @@ public class Point {
 	 * @param jsonObj
 	 */
 	public Point(JsonObject jsonObj) {
-		this.pointJson = jsonObj;
+		super(jsonObj);
 	}
 
 	/**
@@ -79,7 +61,7 @@ public class Point {
 	}
 
 	private JsonObject getProperties() {
-		return (JsonObject) pointJson.get("properties");
+		return (JsonObject) getJson().get("properties");
 	}
 
 	/**
