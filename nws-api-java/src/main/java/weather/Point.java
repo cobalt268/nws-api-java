@@ -20,7 +20,7 @@ public class Point extends GeoJson {
 	 * 
 	 * @param latitude
 	 * @param longitude
-	 * @throws IOException
+	 * @throws MalformedURLException
 	 */
 	public Point(double latitude, double longitude) throws MalformedURLException {
 		URL url = new URL(String.format("https://api.weather.gov/points/%f%%2C%f", latitude, longitude));

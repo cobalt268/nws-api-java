@@ -21,7 +21,7 @@ public class GridpointForecast extends GeoJson {
 	 * @param wfo
 	 * @param x
 	 * @param y
-	 * @throws IOException
+	 * @throws MalformedURLException
 	 */
 	public GridpointForecast(Office wfo, int x, int y) throws MalformedURLException {
 		String urlString = String.format("https://api.weather.gov/gridpoints/%s/%d,%d/forecast", wfo.name(), x, y);
