@@ -2,28 +2,18 @@ package weather;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Scanner;
 import java.math.BigDecimal;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
-import com.github.cliftonlabs.json_simple.Jsoner;
 import com.github.cliftonlabs.json_simple.JsonArray;
 
-
-public class Point {
-	/**
-	 * The API response wrapped by this class.
-	 */
-	private JsonObject pointJson = null;
-	/**
-	 * Holds potential errors returned by invalid API calls.
-	 */
-	private IOException error = null;
-	/**
-	 * Holds whether the wrapped response is valid.
-	 */
-	private boolean valid = true;
-
+/**
+ * Wraps the NWS API Point object.
+ * 
+ * @author cobalt
+ *
+ */
+public class Point extends GeoJson {
 	/**
 	 * Returns a point object from the NWS API with the given latitude and
 	 * longitude.
@@ -33,53 +23,17 @@ public class Point {
 	 * @throws IOException
 	 */
 	public Point(double latitude, double longitude) throws IOException {
-		URL url = new URL(String.format("https://api.weather.gov/points/%.2f%%2C%.2f", latitude, longitude));
-		// catch invalid position or
-		try {
-			Scanner urlScan = new Scanner(url.openStream());
-			String jsonString = "";
-			while (urlScan.hasNext()) {
-				jsonString += urlScan.next();
-			}
-
-			this.pointJson = Jsoner.deserialize(jsonString, pointJson);
-		} catch (IOException e) {
-			error = e;
-			this.valid = false;
-		}
+		URL url = new URL(String.format("https://api.weather.gov/points/%f%%2C%f", latitude, longitude));
+		setJson(requestJson(url));
 	}
 
 	/**
-	 * Wraps a preexisting NWS Point JSON in the Point object.
+	 * Wraps a NWS Point JSON in the Point object. If it isn't a valid point object EVERYTHING WILL BREAK. //TODO some kind of checking utility
 	 * 
 	 * @param jsonObj
 	 */
 	public Point(JsonObject jsonObj) {
-		this.pointJson = jsonObj;
-	}
-
-	/**
-	 * Returns true if the API request produced an error
-	 * 
-	 * @return
-	 */
-	public boolean isValid() {
-		// json only has status key if error
-		return valid;
-	}
-
-	/**
-	 * Returns the error that caused the request to be invalid. If request is valid
-	 * returns null.
-	 * 
-	 * @return
-	 */
-	public IOException getError() {
-		return error;
-	}
-
-	private JsonObject getProperties() {
-		return (JsonObject) pointJson.get("properties");
+		super(jsonObj);
 	}
 
 	/**
@@ -158,6 +112,8 @@ public class Point {
 	 * @return
 	 */
 	public String radar() {
+		if (!isValid())
+			return null;
 		return (String) getProperties().get("radarStation");
 	}
 
@@ -167,6 +123,8 @@ public class Point {
 	 * @return
 	 */
 	private JsonObject getRelativeLocation() {
+		if (!isValid())
+			return null;
 		return (JsonObject) getProperties().get("relativeLocation");
 	}
 
@@ -176,17 +134,35 @@ public class Point {
 	 * @return
 	 */
 	public String city() {
+		if (!isValid())
+			return null;
 		JsonObject location = (JsonObject) getRelativeLocation().get("properties");
 		return (String) location.get("city") + ", " + (String) location.get("state");
 	}
-	
+
 	/**
 	 * Returns the distance in meters from the city given by {@link city()}.
+	 * 
 	 * @return
 	 */
 	public double distanceFromCity() {
+		if (!isValid())
+			return -1;
 		JsonObject location = (JsonObject) getRelativeLocation().get("properties");
 		return ((BigDecimal) ((JsonObject) location.get("distance")).get("value")).doubleValue();
+	}
+
+	/**
+	 * Returns the directional bearing toward the city given by {@link city()} in
+	 * compass degrees.
+	 * 
+	 * @return
+	 */
+	public int bearingFromCity() {
+		if (!isValid())
+			return -1;
+		JsonObject location = (JsonObject) getRelativeLocation().get("properties");
+		return ((BigDecimal) ((JsonObject) location.get("bearing")).get("value")).intValue();
 	}
 
 	/**
@@ -195,6 +171,8 @@ public class Point {
 	 * @return
 	 */
 	public double latitude() {
+		if (!isValid())
+			return 0;
 		JsonObject location = (JsonObject) getRelativeLocation().get("geometry");
 		return ((BigDecimal) ((JsonArray) location.get("coordinates")).get(1)).doubleValue();
 	}
@@ -205,25 +183,19 @@ public class Point {
 	 * @return
 	 */
 	public double longitude() {
+		if (!isValid())
+			return 0;
 		JsonObject location = (JsonObject) getRelativeLocation().get("geometry");
 		return ((BigDecimal) ((JsonArray) location.get("coordinates")).get(0)).doubleValue();
 	}
 
-	public static void main(String[] args) throws IOException {
-		Point ames = new Point(42.034, -93.620);
-		System.out.println(ames.isValid());
-		Point nullIsland = new Point(0, 0);
-		System.out.println(nullIsland.isValid());
-		System.out.println(ames.office());
-		System.out.println(ames.gridX());
-		System.out.println(ames.gridY());
-		System.out.println(nullIsland.office());
-		System.out.println(ames.zone());
-		System.out.println(ames.fireZone());
-		System.out.println(ames.county());
-		System.out.println(ames.city());
-		System.out.println(ames.latitude());
-		System.out.println(ames.longitude());
-		System.out.println(ames.distanceFromCity());
+	/**
+	 * Returns the timezone of the point.
+	 * @return
+	 */
+	public String timeZone() {
+		if (!isValid())
+			return null;
+		return (String) getProperties().get("timeZone");
 	}
 }
