@@ -1,7 +1,7 @@
 package weather;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
@@ -23,7 +23,7 @@ public class GridpointForecast extends GeoJson {
 	 * @param y
 	 * @throws IOException
 	 */
-	public GridpointForecast(Office wfo, int x, int y) throws IOException {
+	public GridpointForecast(Office wfo, int x, int y) throws MalformedURLException {
 		String urlString = String.format("https://api.weather.gov/gridpoints/%s/%d,%d/forecast", wfo.name(), x, y);
 		setJson(requestJson(new URL(urlString)));
 	}

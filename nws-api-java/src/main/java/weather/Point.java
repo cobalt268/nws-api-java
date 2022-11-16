@@ -1,6 +1,6 @@
 package weather;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.math.BigDecimal;
 
@@ -22,7 +22,7 @@ public class Point extends GeoJson {
 	 * @param longitude
 	 * @throws IOException
 	 */
-	public Point(double latitude, double longitude) throws IOException {
+	public Point(double latitude, double longitude) throws MalformedURLException {
 		URL url = new URL(String.format("https://api.weather.gov/points/%f%%2C%f", latitude, longitude));
 		setJson(requestJson(url));
 	}
