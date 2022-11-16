@@ -7,18 +7,34 @@ import java.util.Scanner;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
-public abstract class NWSJson {
+/**
+ * Covers multiple NWS API JSON objects.
+ * 
+ * @author cobalt
+ *
+ */
+public abstract class GeoJson {
 	private JsonObject json;
 	private IOException error;
 	private boolean valid;
-	
-	public NWSJson() {
+
+	public GeoJson() {
 		json = null;
 		error = null;
-		valid = true;
+		valid = false;
 	}
 
-	public NWSJson(JsonObject json) {
+	/**
+	 * Returns the error that caused the request to be invalid. If request is valid
+	 * returns null.
+	 * 
+	 * @return
+	 */
+	public IOException getError() {
+		return error;
+	}
+
+	public GeoJson(JsonObject json) {
 		setJson(json);
 	}
 
@@ -35,16 +51,36 @@ public abstract class NWSJson {
 		try {
 			Scanner urlScan = new Scanner(url.openStream());
 			String jsonString = "";
-			while (urlScan.hasNext()) {
-				jsonString += urlScan.next();
+			while (urlScan.hasNextLine()) {
+				jsonString += urlScan.nextLine();
 			}
 			urlScan.close();
 
+			this.valid = true;
+			this.error = null;
+			
 			return Jsoner.deserialize(jsonString, getJson());
 		} catch (IOException e) {
 			error = e;
 			this.valid = false;
 			return null;
 		}
+	}
+
+	/**
+	 * Returns false if the API request produced an error
+	 * 
+	 * @return
+	 */
+	public boolean isValid() {
+		return valid;
+	}
+	
+	/**
+	 * Returns the "properties" object of the JSON request.
+	 * @return
+	 */
+	protected JsonObject getProperties() {
+		return (JsonObject) getJson().get("properties");
 	}
 }
