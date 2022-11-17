@@ -1,4 +1,4 @@
-package weather;
+package nwsWeatherApi;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
 

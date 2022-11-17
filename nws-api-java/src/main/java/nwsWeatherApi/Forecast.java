@@ -1,4 +1,4 @@
-package weather;
+package nwsWeatherApi;
 
 import java.io.IOException;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package weather;
+package nwsWeatherApi;
 
 /**
  * The possible NWS forecast offices for use by the NWS API.

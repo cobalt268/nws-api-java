@@ -1,4 +1,4 @@
-package weather;
+package nwsWeatherApi;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;

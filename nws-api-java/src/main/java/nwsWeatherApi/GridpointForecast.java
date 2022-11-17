@@ -1,4 +1,4 @@
-package weather;
+package nwsWeatherApi;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,18 +43,6 @@ public class GridpointForecast extends Forecast {
 	@Override
 	protected ForecastPeriod createPeriod(JsonObject obj) {
 		return new GridpointForecastPeriod(obj);
-	}
-
-	/**
-	 * why does the api do this to me
-	 * 
-	 * @param args
-	 * @throws MalformedURLException
-	 */
-	public static void main(String[] args) throws MalformedURLException {
-		// TODO remove test main
-		GridpointForecast test = new GridpointForecast(Office.ILM, 94, 68);
-		System.out.println(test);
 	}
 
 	/**
