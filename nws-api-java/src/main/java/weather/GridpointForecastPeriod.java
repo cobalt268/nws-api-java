@@ -26,7 +26,7 @@ public class GridpointForecastPeriod extends ForecastPeriod {
 		iconUrl = (String) obj.get("icon");
 		isDaytime = (boolean) obj.get("isDaytime");
 		shortForecast = (String) obj.get("shortForecast");
-		periodNumber = ((BigDecimal) obj.get("periodNumber")).intValue();
+		periodNumber = ((BigDecimal) obj.get("number")).intValue();
 	}
 
 	/**
