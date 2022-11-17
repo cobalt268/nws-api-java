@@ -23,6 +23,8 @@ public class GridpointForecastPeriod extends ForecastPeriod {
 			temperatureTrend = trend;
 		startTime = (String) obj.get("startTime");
 		endTime = (String) obj.get("endTime");
+		iconUrl = (String) obj.get("icon");
+		isDaytime = (boolean) obj.get("isDaytime");
 	}
 
 	public String windSpeed() {

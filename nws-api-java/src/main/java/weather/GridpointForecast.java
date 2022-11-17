@@ -29,7 +29,7 @@ public class GridpointForecast extends Forecast {
 	 * @throws MalformedURLException
 	 */
 	public static void main(String[] args) throws MalformedURLException {
-		GridpointForecast test = new GridpointForecast(Office.LOT, 10, 10);
+		GridpointForecast test = new GridpointForecast(Office.ILM, 94, 68);
 		System.out.println(test);
 	}
 }
