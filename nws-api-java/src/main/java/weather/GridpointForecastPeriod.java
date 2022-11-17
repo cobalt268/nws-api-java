@@ -4,12 +4,24 @@ import java.math.BigDecimal;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
 
+/**
+ * Holds information about {@link GridpointForecast} periods.
+ * 
+ * @author cobalt
+ *
+ */
 public class GridpointForecastPeriod extends ForecastPeriod {
 	private String windSpeed, windDirection, temperatureTrend, startTime, endTime, iconUrl, shortForecast;
 	private int temperature, periodNumber;
 	private char temperatureUnit;
 	private boolean isDaytime;
 
+	/**
+	 * Creates a GridpointForecastPeriod from a <b>valid</b> JSON of the NWS API
+	 * GridpointForecast schema.
+	 * 
+	 * @param obj
+	 */
 	public GridpointForecastPeriod(JsonObject obj) {
 		super(obj);
 		windSpeed = (String) obj.get("windSpeed");

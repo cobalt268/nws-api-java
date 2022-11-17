@@ -9,6 +9,11 @@ import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
+/**
+ * Superclass of every forecast class.
+ * @author cobalt
+ *
+ */
 public abstract class Forecast {
 	ArrayList<ForecastPeriod> periods = new ArrayList<ForecastPeriod>();
 
@@ -20,6 +25,11 @@ public abstract class Forecast {
 		}
 	}
 
+	/**
+	 * Creates an instance of the subclass's associated {@link ForecastPeriod} subclass.
+	 * @param obj
+	 * @return
+	 */
 	protected abstract ForecastPeriod createPeriod(JsonObject obj);
 
 	/**
@@ -36,7 +46,7 @@ public abstract class Forecast {
 	 * 
 	 * @return
 	 */
-	protected JsonObject getProperties(JsonObject obj) {
+	protected static JsonObject getProperties(JsonObject obj) {
 		return (JsonObject) obj.get("properties");
 	}
 
