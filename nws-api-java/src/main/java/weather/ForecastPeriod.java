@@ -2,6 +2,11 @@ package weather;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
 
+/**
+ * Superclass of every forecast period class.
+ * @author cobalt
+ *
+ */
 public abstract class ForecastPeriod {
 
 	String detailedText;
@@ -21,6 +26,6 @@ public abstract class ForecastPeriod {
 	}
 
 	public String toString() {
-		return name + "\n" + detailedText;
+		return name() + "\n" + text();
 	}
 }

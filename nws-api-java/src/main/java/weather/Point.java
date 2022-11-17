@@ -1,201 +1,258 @@
 package weather;
 
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.math.BigDecimal;
 
-import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.JsonArray;
+import com.github.cliftonlabs.json_simple.JsonObject;
 
 /**
- * Wraps the NWS API Point object.
+ * Wraps the PointGeoJson schema of the NWS API.
  * 
  * @author cobalt
  *
  */
-public class Point extends GeoJson {
+public class Point {
+	private Office office;
+	private int gridX, gridY, bearingFromCity;
+	private String zone, fireZone, county, radar, city, timezone;
+	private double distanceFromCity, latitude, longitude;
+
+	// constructors
+
 	/**
-	 * Returns a point object from the NWS API with the given latitude and
-	 * longitude.
+	 * Creates a Point object with the given latitude and longitude. Coordinates
+	 * must be in the NWS's jurisdiction.
 	 * 
 	 * @param latitude
 	 * @param longitude
-	 * @throws MalformedURLException
 	 */
-	public Point(double latitude, double longitude) throws MalformedURLException {
-		URL url = new URL(String.format("https://api.weather.gov/points/%f%%2C%f", latitude, longitude));
-		setJson(requestJson(url));
+	public Point(double latitude, double longitude) {
+		this(Forecast.getProperties(Forecast.requestJson(generateURL(latitude, longitude))));
 	}
 
 	/**
-	 * Wraps a NWS Point JSON in the Point object. If it isn't a valid point object EVERYTHING WILL BREAK. //TODO some kind of checking utility
+	 * Creates a point object using a <b>valid</b> NWS API JSON of the PointGeoJson
+	 * schema.
 	 * 
-	 * @param jsonObj
+	 * @param obj
 	 */
-	public Point(JsonObject jsonObj) {
-		super(jsonObj);
+	public Point(JsonObject obj) {
+		System.out.println(obj);
+		// set office instance variable
+		String officeName = (String) obj.get("cwa");
+		for (Office officeX : Office.values()) {
+			if (officeX.name().equals(officeName))
+				office = officeX;
+		}
+
+		// set grid coordinates
+		gridX = ((BigDecimal) obj.get("gridX")).intValue();
+		gridY = ((BigDecimal) obj.get("gridY")).intValue();
+
+		// set location codes
+		String zoneUrl = (String) obj.get("forecastZone");
+		zone = zoneUrl.substring(zoneUrl.length() - 6, zoneUrl.length());
+
+		String fireZoneUrl = (String) obj.get("fireWeatherZone");
+		fireZone = fireZoneUrl.substring(fireZoneUrl.length() - 6, fireZoneUrl.length());
+
+		String countyUrl = (String) obj.get("county");
+		county = countyUrl.substring(countyUrl.length() - 6, countyUrl.length());
+
+		// set radar station callsign
+		radar = (String) obj.get("radarStation");
+
+		// set city
+		JsonObject location = (JsonObject) getRelativeLocation(obj).get("properties");
+		city = (String) location.get("city") + ", " + (String) location.get("state");
+		System.out.println(city);
+
+		distanceFromCity = ((BigDecimal) ((JsonObject) location.get("distance")).get("value")).doubleValue();
+		bearingFromCity = ((BigDecimal) ((JsonObject) location.get("bearing")).get("value")).intValue();
+
+		// set coordinates
+		JsonObject geometry = (JsonObject) getRelativeLocation(obj).get("geometry");
+
+		latitude = ((BigDecimal) ((JsonArray) geometry.get("coordinates")).get(1)).doubleValue();
+		longitude = ((BigDecimal) ((JsonArray) geometry.get("coordinates")).get(0)).doubleValue();
+
+		// set timezone
+		timezone = (String) obj.get("timeZone");
 	}
 
+	// accessor methods
+
 	/**
-	 * Returns the WFO associated with the point.
+	 * Returns the WFO responsible for the point.
 	 * 
 	 * @return
 	 */
 	public Office office() {
-		if (!isValid())
-			return Office.INVALID_OFFICE;
-		String officeName = (String) getProperties().get("cwa");
-		for (Office office : Office.values()) {
-			if (office.name().equals(officeName))
-				return office;
-		}
-		return Office.INVALID_OFFICE;
+		return office;
 	}
 
 	/**
-	 * Returns the point's X position on the WFO's forecast grid.
+	 * Returns the X coordinate of the Point's grid within the WFO.
 	 * 
 	 * @return
 	 */
 	public int gridX() {
-		return (isValid()) ? ((BigDecimal) getProperties().get("gridX")).intValue() : null;
+		return gridX;
 	}
 
 	/**
-	 * Returns the point's Y position on the WFO's forecast grid.
+	 * Returns the Y coordinate of the Point's grid within the WFO.
 	 * 
 	 * @return
 	 */
 	public int gridY() {
-		return (isValid()) ? ((BigDecimal) getProperties().get("gridY")).intValue() : null;
+		return gridY;
 	}
 
 	/**
-	 * Returns the forecast zone of the point.
+	 * Returns the compass angle from the point towards the city returned by
+	 * {@link city()}.
+	 * 
+	 * @return
+	 */
+	public int bearingFromCity() {
+		return bearingFromCity;
+	}
+
+	/**
+	 * Returns the zone code for the point.
 	 * 
 	 * @return
 	 */
 	public String zone() {
-		if (!isValid())
-			return null;
-		String zoneUrl = (String) getProperties().get("forecastZone");
-		return zoneUrl.substring(zoneUrl.length() - 6, zoneUrl.length());
+		return zone;
 	}
 
 	/**
-	 * Returns the fire weather forecast zone of the point.
+	 * Returns the fire weather zone code for the point.
 	 * 
 	 * @return
 	 */
 	public String fireZone() {
-		if (!isValid())
-			return null;
-		String zoneUrl = (String) getProperties().get("fireWeatherZone");
-		return zoneUrl.substring(zoneUrl.length() - 6, zoneUrl.length());
+		return fireZone;
 	}
 
 	/**
-	 * Returns the NWS county code of the point.
+	 * Returns the county code for the point.
 	 * 
 	 * @return
 	 */
 	public String county() {
-		if (!isValid())
-			return null;
-		String zoneUrl = (String) getProperties().get("county");
-		return zoneUrl.substring(zoneUrl.length() - 6, zoneUrl.length());
+		return county;
 	}
 
 	/**
-	 * Returns the radar station responsible for this point
+	 * Returns the callsign of the radar station responsible for the point.
 	 * 
 	 * @return
 	 */
 	public String radar() {
-		if (!isValid())
-			return null;
-		return (String) getProperties().get("radarStation");
+		return radar;
 	}
+
+	/**
+	 * Returns the nearest city. Direction and distance from the point can be found
+	 * using {@link bearingFromCity()} and {@link distanceFromCity()}.
+	 * 
+	 * @return
+	 */
+	public String city() {
+		return city;
+	}
+
+	/**
+	 * Returns a String representation of the Point's timezone.
+	 * 
+	 * @return
+	 */
+	public String timezone() {
+		return timezone;
+	}
+
+	/**
+	 * Returns the Point's distance from the city returned by {@link city()} in
+	 * meters.
+	 * 
+	 * @return
+	 */
+	public double distanceFromCity() {
+		return distanceFromCity;
+	}
+
+	/**
+	 * Returns the Point's latitude.
+	 * 
+	 * @return
+	 */
+	public double latitude() {
+		return latitude;
+	}
+
+	/**
+	 * Returns the Point's longitude.
+	 * 
+	 * @return
+	 */
+	public double longitude() {
+		return longitude;
+	}
+
+	// static methods
 
 	/**
 	 * Returns the relative location structure of the response.
 	 * 
 	 * @return
 	 */
-	private JsonObject getRelativeLocation() {
-		if (!isValid())
-			return null;
-		return (JsonObject) getProperties().get("relativeLocation");
+	protected static JsonObject getRelativeLocation(JsonObject obj) {
+		return (JsonObject) ((JsonObject) obj.get("relativeLocation"));
 	}
 
+	// forecast generation methods
+
 	/**
-	 * Returns the city and state nearest to the point.
+	 * Returns the {@link ZoneForecast} for the point.
 	 * 
 	 * @return
 	 */
-	public String city() {
-		if (!isValid())
-			return null;
-		JsonObject location = (JsonObject) getRelativeLocation().get("properties");
-		return (String) location.get("city") + ", " + (String) location.get("state");
+	public ZoneForecast zoneForecast() {
+		return new ZoneForecast(zone);
 	}
 
 	/**
-	 * Returns the distance in meters from the city given by {@link city()}.
+	 * Returns the {@link GridpointForecast} for the point.
 	 * 
 	 * @return
 	 */
-	public double distanceFromCity() {
-		if (!isValid())
-			return -1;
-		JsonObject location = (JsonObject) getRelativeLocation().get("properties");
-		return ((BigDecimal) ((JsonObject) location.get("distance")).get("value")).doubleValue();
+	public GridpointForecast gridpointForecast() {
+		return new GridpointForecast(office, gridX, gridY);
 	}
 
+	// private methods
 	/**
-	 * Returns the directional bearing toward the city given by {@link city()} in
-	 * compass degrees.
+	 * All URLs used in the {@link PointNew(double latitude, double longitude)}
+	 * constructor <b>should</b> be valid because they are build using enums and
+	 * primitives. This allows us to not have to use a throws statement on the
+	 * constructor.
 	 * 
+	 * @param latitude
+	 * @param longitude
 	 * @return
 	 */
-	public int bearingFromCity() {
-		if (!isValid())
-			return -1;
-		JsonObject location = (JsonObject) getRelativeLocation().get("properties");
-		return ((BigDecimal) ((JsonObject) location.get("bearing")).get("value")).intValue();
-	}
-
-	/**
-	 * Returns the latitude of the point
-	 * 
-	 * @return
-	 */
-	public double latitude() {
-		if (!isValid())
-			return 0;
-		JsonObject location = (JsonObject) getRelativeLocation().get("geometry");
-		return ((BigDecimal) ((JsonArray) location.get("coordinates")).get(1)).doubleValue();
-	}
-
-	/**
-	 * Returns the longitude of the point
-	 * 
-	 * @return
-	 */
-	public double longitude() {
-		if (!isValid())
-			return 0;
-		JsonObject location = (JsonObject) getRelativeLocation().get("geometry");
-		return ((BigDecimal) ((JsonArray) location.get("coordinates")).get(0)).doubleValue();
-	}
-
-	/**
-	 * Returns the timezone of the point.
-	 * @return
-	 */
-	public String timeZone() {
-		if (!isValid())
-			return null;
-		return (String) getProperties().get("timeZone");
+	private static URL generateURL(double latitude, double longitude) {
+		try {
+			return new URL(String.format("https://api.weather.gov/points/%f%%2C%f", latitude, longitude));
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
