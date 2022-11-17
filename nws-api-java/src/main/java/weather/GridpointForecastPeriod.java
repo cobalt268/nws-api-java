@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import com.github.cliftonlabs.json_simple.JsonObject;
 
 public class GridpointForecastPeriod extends ForecastPeriod {
-	private String windSpeed, windDirection, temperatureTrend, startTime, endTime, iconUrl;
+	private String windSpeed, windDirection, temperatureTrend, startTime, endTime, iconUrl, shortForecast;
 	private int temperature;
 	private char temperatureUnit;
 	private boolean isDaytime;
@@ -25,6 +25,11 @@ public class GridpointForecastPeriod extends ForecastPeriod {
 		endTime = (String) obj.get("endTime");
 		iconUrl = (String) obj.get("icon");
 		isDaytime = (boolean) obj.get("isDaytime");
+		shortForecast = (String) obj.get("shortForecast");
+	}
+	
+	public String shortForecast() {
+		return shortForecast;
 	}
 
 	public String windSpeed() {
