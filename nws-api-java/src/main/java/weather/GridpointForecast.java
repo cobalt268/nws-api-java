@@ -12,6 +12,15 @@ public class GridpointForecast extends Forecast {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Creates a GridpointForecast using the WFO and the X and Y coordinates on the
+	 * WFO's grid. Each grid coordinate corresponds to a 2.5 * 2.5 km square.
+	 * 
+	 * @param wfo
+	 * @param x
+	 * @param y
+	 * @throws MalformedURLException
+	 */
 	public GridpointForecast(Office wfo, int x, int y) throws MalformedURLException {
 		this(requestJson(
 				new URL(String.format("https://api.weather.gov/gridpoints/%s/%d,%d/forecast", wfo.name(), x, y))));
