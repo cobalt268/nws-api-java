@@ -5,3 +5,5 @@ A Java wrapper for the NWS weather data API
 
 Includes:
 [json-simple-4.0.1](https://cliftonlabs.github.io/json-simple/)
+
+This project is not affiliated with the National Weather Service or the United States government.
